@@ -25,10 +25,6 @@ class Pessoa{
 
     ]);
 
-    echo "<pre>";
-    print_r($this);
-    echo "</pre>";
-
   }
 
 }

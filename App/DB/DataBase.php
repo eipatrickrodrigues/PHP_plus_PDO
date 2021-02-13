@@ -13,7 +13,7 @@ class DataBase{
   const USER = 'root';
   const PASS = '';
   private $table;
-  private $connection;
+  private $pdo;
 
   // Método construtor
   
@@ -27,8 +27,8 @@ class DataBase{
   private function setConnection(){
 
     try{
-        $this->connection = new PDO('mysql:dbname = '.self::NAME.'; host = '.self::HOST,self::USER,self::PASS);
-        $this->connection->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+        $this->pdo = new PDO('mysql:host = '.self::HOST.';dbname = '.self::NAME,self::USER,self::PASS);
+        $this->pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
     }
     catch(PDOException $e){
       echo "Erro no Banco de Dados (setConnection) : ".$e->getMessage();
@@ -41,13 +41,14 @@ class DataBase{
   }
 
   //Método executor de queries dentro do banco de dados.
+  // Os parâmetros são necessários quando existem binds.
   public function execute($query,$params = []){
 
     try{
         
-        $statement = $this->connection->prepare($query);
-        $statement->execute($params);
-        return $statement;
+      $statement = $this->pdo->prepare($query);
+      $statement->execute($params);
+      return $statement;
 
     }catch(PDOException $e){
         echo "Erro no Banco de Dados (execute) : ".$e->getMessage();
@@ -59,8 +60,8 @@ class DataBase{
 
   public function insert($values){
     // Dados da query
-    $fields = array_keys($values);
-    $binds = array_pad([], count($fields),'?');
+    $fields = array_keys($values); // Keys são as variáveis Nome, Telefone...
+    $binds = array_pad([], count($fields),'?'); // Binds são os valores que serão alocados nestas variáveis
 
     // Query
     $query = 'INSERT INTO '.$this->table.' ('.implode(',',$fields).') values ('.implode(',',$binds).')';
@@ -69,7 +70,7 @@ class DataBase{
     $this->execute($query, array_values($values));
 
     // Retorna o ID
-    return $this->connection->lastInsertId()+1;
+    return $this->pdo->lastInsertId()+1;
 
   }
 
